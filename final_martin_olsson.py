@@ -1,13 +1,10 @@
 import csv
 
 def programa():
-
-    clientes = []
-    viajes = []
-
     while True:
         imprimir_menu()
         opcion = input("\n-Ingrese el número de la opción deseada: ")
+        dibujar_separador()
 
         #loguear opcione elegida si es correcta al comienzo de cada funcion
         if opcion == "5":
@@ -36,10 +33,9 @@ def imprimir_menu():
     print("4 - Consultar log")
     print("5 - Salir")
 
-#dibuja una linea de guiones -
-guiones = 90
-
+#dibuja una linea de guiones 
 def dibujar_separador():
+    guiones = 90
     print( "-" * guiones )
 
 # Permitir la búsqueda de un cliente por su nombre (parcial o total) , mostrando todos sus datos.
@@ -50,26 +46,58 @@ def datos_cliente_x_nombre():
             validar_csv(archivo)
 
             clientes_csv = csv.reader(archivo)
-            campos = next(clientes_csv,None)
+            columnas = next(clientes_csv,None)
 
+            #Guarda todos los nombres del archivo clientes en una lista
+            nombres=[]
+            #Guarda los valores de los campos en otra lista
+            campos=[]
+
+            #Itera sobre el archivo y guarda los nombres y los campos de cada linea
+            cliente = next(clientes_csv,None)
+            while cliente:
+                nombres.append(cliente[0])
+                campos.append(cliente)
+                cliente = next(clientes_csv,None)
+
+            #Pide al usuario ingresar el nombre del cliente,continua iterando hasta que solo haya un resultado
+            cliente_elegido = []
+            while not len(cliente_elegido) == 1:
+                #usa la funcion buscar y le envia la lista de nombres
+                cliente_elegido = buscar(nombres)
+            
+            for linea in campos:
+                #Busca en la lista de datos obtenidos del archivo hasta encontrar al cliente elegido
+                if linea[0] == cliente_elegido[0]:
+                    dibujar_separador()
+                    #Imprime los datos de cada columna correspondiente al cliente
+                    for indice in range(0,len(columnas)):
+                        print(f'{columnas[indice]}: {linea[indice]}')
+                    dibujar_separador()
 
     except IOError:
         print("Hubo un problema con el archivo")
-    
 
+
+#Se usa para buscar elementos dentro de una lista y devuelve los resultados encontrados
 def buscar(elementos):
-    buscarNombre = input("Ingrese el nombre que desea buscar: ")
+    buscarNombre = input("\nIngrese el nombre que desea buscar: ").lower()
 
     resultados = []
     for elemento in elementos:
         #Si la cadena ingresada esta presente dentro del nombre actual
         #añade el elemento correspondiente a los resultados
-        if(buscarNombre in elemento["nombre"]):
+        if(buscarNombre in elemento.lower()):
             resultados.append(elemento)
 
-    print("\n-Resultados-\n")
-    for resultado in resultados:
-        print(f"{resultado}")
+    if len(resultados) > 1:
+        print("\n-Resultados-\n")
+        for resultado in resultados:
+            print(f"{resultado}")
+    elif len(resultados)== 0:
+        print("-No se encontraron resultados-")
+    
+    return resultados
 
 
 # Permitir obtener el total de usuarios por empresa, y todos sus datos.
@@ -148,10 +176,14 @@ def validar_csv(archivo,validar_viajes=False):
             #pasa a la siguiente linea
             datos = next(archivo_csv,None)
         
+        #Una vez que termina de hacer las validaciones vuelve el puntero al inicio del archivo
+        archivo.seek(0)
+
     except Exception as mensaje_error:
         dibujar_separador()
         print(f'{mensaje_error}')
         dibujar_separador()
 
+#--------------------------------------------------
 #Se ejecuta el programa
 programa()
