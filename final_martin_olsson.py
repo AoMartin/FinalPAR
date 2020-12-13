@@ -60,12 +60,18 @@ def datos_cliente_x_nombre():
                 campos.append(cliente)
                 cliente = next(clientes_csv,None)
 
-            #Pide al usuario ingresar el nombre del cliente,continua iterando hasta que solo haya un resultado
+            #Pide al usuario ingresar el nombre del cliente,continua iterando hasta que solo haya un resultado o se cancele
             cliente_elegido = []
             while not len(cliente_elegido) == 1:
                 #usa la funcion buscar y le envia la lista de nombres
-                cliente_elegido = buscar(nombres)
-            
+                cliente_elegido, salir = buscar(nombres)
+                if salir:
+                    break
+
+            #Si no se ingresa ningun nombre se sale de la opcion
+            if salir:
+                return
+
             for linea in campos:
                 #Busca en la lista de datos obtenidos del archivo hasta encontrar al cliente elegido
                 if linea[0] == cliente_elegido[0]:
@@ -78,27 +84,28 @@ def datos_cliente_x_nombre():
     except IOError:
         print("Hubo un problema con el archivo")
 
-
 #Se usa para buscar elementos dentro de una lista y devuelve los resultados encontrados
 def buscar(elementos):
-    buscarNombre = input("\nIngrese el nombre que desea buscar: ").lower()
+    buscarNombre = input("\nIngrese el nombre que desea buscar (pulsar enter para cancelar): ").lower()
 
     resultados = []
-    for elemento in elementos:
-        #Si la cadena ingresada esta presente dentro del nombre actual
-        #añade el elemento correspondiente a los resultados
-        if(buscarNombre in elemento.lower()):
-            resultados.append(elemento)
 
-    if len(resultados) > 1:
-        print("\n-Resultados-\n")
-        for resultado in resultados:
-            print(f"{resultado}")
-    elif len(resultados)== 0:
-        print("-No se encontraron resultados-")
+    if not len(buscarNombre) == 0:
+        for elemento in elementos:
+            #Si la cadena ingresada esta presente dentro del nombre actual
+            #añade el elemento correspondiente a los resultados
+            if(buscarNombre in elemento.lower()):
+                resultados.append(elemento)
+
+        if len(resultados) > 1:
+            print("\n-Resultados-\n")
+            for resultado in resultados:
+                print(f"{resultado}")
+        elif len(resultados)== 0:
+            print("-No se encontraron resultados-")
     
-    return resultados
-
+    #Si no se ingreso ningun nombre 'salir'(el segundo valor de return) sera True
+    return resultados, len(buscarNombre) == 0
 
 # Permitir obtener el total de usuarios por empresa, y todos sus datos.
 def total_usuarios_x_empresa():
