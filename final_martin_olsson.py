@@ -138,10 +138,12 @@ def validar_csv(archivo,validar_viajes=False):
                     decimales_precio = datos[2].split(".")
                     if not len(decimales_precio[1]) == 2:
                         raise Exception(f'Se encontró un valor de precio que no tenía dos decimales en {archivo.name} en la línea: {datos}')
-                except:
+                except IndexError:
+                    #Si no se puede hacer split devolvera IndexError en el if (decimales_precio[1]) porque el valor no tiene parte decimal
                     raise Exception(f'Se encontró un valor de precio que no tenía parte decimal en {archivo.name} en la línea: {datos}')
+                
             #Valida el Documento, campo indice 2 en clientes, campo indice 0 en viajes
-            if len(datos[indice]) < 7 and len(datos[indice]) > 8:
+            if len(datos[indice]) < 7 or len(datos[indice]) > 8:
                 raise Exception(f'Se encontró un número de Documento incorrecto en {archivo.name} en la línea: {datos}')
             #pasa a la siguiente linea
             datos = next(archivo_csv,None)
