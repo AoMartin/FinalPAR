@@ -109,8 +109,61 @@ def buscar(elementos):
 
 # Permitir obtener el total de usuarios por empresa, y todos sus datos.
 def total_usuarios_x_empresa():
-    #TODO
-    pass
+    try:
+        #Se agrego encoding="utf8" al abrir el archivo porque sino tiraba un error
+        with open("Clientes.csv", 'r',encoding="utf8", newline="") as archivo:
+            validar_csv(archivo)
+
+            clientes_csv = csv.reader(archivo)
+            columnas = next(clientes_csv,None)
+
+            #Guarda todos los nombres de empresas del archivo clientes en una lista
+            nombres_empresa=[]
+            #Guarda los valores de los campos en otra lista
+            campos=[]
+            #Guarda la cantidad de usuarios x empresa en un diccionario
+            num_usuarios_x_empresa = {}
+
+            #Itera sobre el archivo y guarda los nombres de empresa y los campos de cada linea
+            cliente = next(clientes_csv,None)
+            while cliente:
+                #Si el nombre de la empresa todavia no esta en la lista lo agrega
+                if not cliente[5] in nombres_empresa:
+                    nombres_empresa.append(cliente[5])
+                #Cada vez que aparece el mismo nombre de empresa le suma uno a la cantidad de clientes en el diccionario, sino existe aun la clave la crea con valor 1
+                if not cliente[5] in num_usuarios_x_empresa:
+                    num_usuarios_x_empresa[cliente[5]] = 1
+                else:
+                    num_usuarios_x_empresa[cliente[5]] += 1
+                campos.append(cliente)
+                cliente = next(clientes_csv,None)
+
+            #Pide al usuario ingresar el nombre de la empresa,continua iterando hasta que solo haya un resultado o se cancele
+            empresa_elegida = []
+            while not len(empresa_elegida) == 1:
+                #usa la funcion buscar y le envia la lista de nombres
+                empresa_elegida, salir = buscar(nombres_empresa)
+                if salir:
+                    break
+
+            #Si no se ingresa ningun nombre se sale de la opcion
+            if salir:
+                return
+
+            #Imprime el nombre de la empresa, total de usuarios y las cabeceras de las columnas
+            dibujar_separador()
+            print(f'Empresa: {empresa_elegida[0]}')
+            print(f'Total Usuarios: {num_usuarios_x_empresa[empresa_elegida[0]]}')
+            dibujar_separador()
+            print(f'{columnas}')
+
+            #Imprime todos los usuarios que pertenezan a la empresa, de la lista de campos guardados del archivo
+            for linea in campos:
+                if linea[5] == empresa_elegida[0]:
+                    print(f'{linea}')
+
+    except IOError:
+        print("Hubo un problema con el archivo")
 
 # Permitir obtener el total de dinero en viajes por nombre de empresa.
 def total_dinero_x_empresa():
