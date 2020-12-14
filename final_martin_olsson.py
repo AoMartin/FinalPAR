@@ -12,14 +12,32 @@ def programa():
         if opcion == "5":
             #loguear salida
             exit()
+
         elif opcion == "1":
+            dibujar_separador()
+            print("1 - Datos de cliente por nombre")
             datos_cliente_x_nombre()
+
         elif opcion == "2":
+            dibujar_separador()
+            print("2 - Datos de usuarios por empresa")
             total_usuarios_x_empresa()
+
         elif opcion == "3":
+            dibujar_separador()
+            print("3 - Facturación total por empresa")
             total_dinero_x_empresa()
+
         elif opcion == "4":
+            dibujar_separador()
+            print("4 - Datos de usuario por dni")
+            total_viajes_x_dni()
+
+        elif opcion == "5":
+            dibujar_separador()
+            print("5 - Consultar log")
             consultar_log()
+
         else:
             print("\n-Por favor elija una opcion valida!-")
 
@@ -31,9 +49,9 @@ def imprimir_menu():
     print("1 - Datos de cliente por nombre")
     print("2 - Datos de usuarios por empresa")
     print("3 - Facturación total por empresa")
-    print("3 - Datos de usuario por dni")
-    print("4 - Consultar log")
-    print("5 - Salir")
+    print("4 - Datos de usuario por dni")
+    print("5 - Consultar log")
+    print("6 - Salir")
 
 #dibuja una linea de guiones 
 def dibujar_separador():
@@ -88,7 +106,7 @@ def datos_cliente_x_nombre():
 
 #Se usa para buscar elementos dentro de una lista y devuelve los resultados encontrados
 def buscar(elementos):
-    buscarNombre = input("\nIngrese el nombre que desea buscar (pulsar enter para cancelar): ").lower()
+    buscarNombre = input("\nIngrese el dato que desea buscar (pulsar enter para cancelar): ").lower()
 
     resultados = []
 
@@ -241,8 +259,89 @@ def total_dinero_x_empresa():
 # Permitir obtener cantidad total de viajes realizados y monto total por
 # documento, y mostrar los datos del empleado y los viajes.
 def total_viajes_x_dni():
-    #TODO
-    pass
+    try:
+        #Se agrego encoding="utf8" al abrir el archivo porque sino tiraba un error
+        with open("Clientes.csv", 'r',encoding="utf8", newline="") as archivo_clientes:
+            with open("viajes.csv", 'r',encoding="utf8", newline="") as archivo_viajes:
+                validar_csv(archivo_clientes)
+                validar_csv(archivo_viajes,True)
+
+                clientes_csv = csv.reader(archivo_clientes)
+                viajes_csv = csv.reader(archivo_viajes)
+
+                #Se guardan los nombres de columnas
+                columnas_clientes = next(clientes_csv,None)
+                columnas_viajes = next(viajes_csv,None)
+
+                #Guarda todos los dnis del archivo clientes en una lista
+                numeros_dni=[]
+                #Guarda los gastos totales x dni y la cantidad de viajes del archivo viajes en un diccionario
+                gastos_totales_x_dni = {}
+                cantidad_viajes_x_dni = {}
+
+                #Guarda los campos de los archivos clientes y viajes
+                campos_clientes = []
+                campos_viajes = []
+
+                #Recorre el archivo viajes para guardar los gastos en el diccionario gastos_totales_x_dni y los campos del archivo
+                viaje = next(viajes_csv,None)
+                while viaje:
+                    #Guarda los gastos totales y cantidad de viajes x num de dni, si no esta el dni en el diccionario lo agrega
+                    if not viaje[0] in gastos_totales_x_dni:
+                        gastos_totales_x_dni[viaje[0]] = Decimal(viaje[2])
+                        cantidad_viajes_x_dni[viaje[0]] = 1
+                    else:
+                        gastos_totales_x_dni[viaje[0]] += Decimal(viaje[2])
+                        cantidad_viajes_x_dni[viaje[0]] += 1
+                    campos_viajes.append(viaje)
+                    viaje = next(viajes_csv,None)
+
+                #Recorre el archibo clientes para guardar los dnis y los campos del archivo
+                cliente = next(clientes_csv,None)
+                while cliente:
+                    #Si el dni todavia no esta en la lista lo agrega
+                    if not cliente[2] in numeros_dni:
+                        numeros_dni.append(cliente[2])
+                    campos_clientes.append(cliente)
+                    cliente = next(clientes_csv,None)
+                
+                #Pide al usuario ingresar el nombre de la empresa,continua iterando hasta que solo haya un resultado o se cancele
+                dni_elegido = []
+                while not len(dni_elegido) == 1:
+                    #usa la funcion buscar y le envia la lista de nombres
+                    dni_elegido, salir = buscar(numeros_dni)
+                    if salir:
+                        break
+
+                #Si no se ingresa ningun nombre se sale de la opcion
+                if salir:
+                    return
+
+                #Imprime todos los datos
+                dibujar_separador()
+                print(f'Documento: {dni_elegido[0]}')
+
+                dibujar_separador()
+                print(f'{columnas_clientes}')
+                for datos_cliente in campos_clientes:
+                    if datos_cliente[2] == dni_elegido[0]:
+                        print(f'{datos_cliente}') 
+
+                dibujar_separador()
+                if not dni_elegido[0] in gastos_totales_x_dni:
+                    print('Total viajes: 0, Monto: $0')
+                else:
+                    print(f'Total viajes: {cantidad_viajes_x_dni[dni_elegido[0]]}, Monto: ${gastos_totales_x_dni[dni_elegido[0]]}')
+
+                dibujar_separador()
+                print(f'{columnas_viajes}')
+                for datos_viaje in campos_viajes:
+                    if datos_viaje[0] == dni_elegido[0]:
+                        print(f'{datos_viaje}')
+                dibujar_separador()
+
+    except IOError:
+        print("Hubo un problema con el archivo")
 
 # Muestra el contenido del log en pantalla
 def consultar_log():
