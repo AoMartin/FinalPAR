@@ -1,4 +1,6 @@
 import csv
+#Importo Decimal porque float en ciertas ocasiones genera mas de 2 decimales 
+from decimal import Decimal
 
 def programa():
     while True:
@@ -167,8 +169,74 @@ def total_usuarios_x_empresa():
 
 # Permitir obtener el total de dinero en viajes por nombre de empresa.
 def total_dinero_x_empresa():
-    #TODO
-    pass
+    try:
+        #Se agrego encoding="utf8" al abrir el archivo porque sino tiraba un error
+        with open("Clientes.csv", 'r',encoding="utf8", newline="") as archivo_clientes:
+            with open("viajes.csv", 'r',encoding="utf8", newline="") as archivo_viajes:
+                validar_csv(archivo_clientes)
+                validar_csv(archivo_viajes,True)
+
+                clientes_csv = csv.reader(archivo_clientes)
+                viajes_csv = csv.reader(archivo_viajes)
+
+                #Se saltean los nombres de columnas
+                next(clientes_csv,None)
+                next(viajes_csv,None)
+
+                #Guarda todos los nombres de empresas del archivo clientes en una lista
+                nombres_empresa=[]
+                #Guarda los gastos totales x empresa en un diccionario
+                gastos_totales_x_empresa = {}
+                #Guarda los gastos totales x dni del archivo viajes en un diccionario
+                gastos_totales_x_dni = {}
+
+                #Recorre el archivo viajes para guardar los gastos en el diccionario gastos_totales_x_dni
+                viaje = next(viajes_csv,None)
+                while viaje:
+                    #Guarda los gastos totales x num de dni, si no esta el dni en el diccionario lo agrega
+                    if not viaje[0] in gastos_totales_x_dni:
+                        gastos_totales_x_dni[viaje[0]] = Decimal(viaje[2])
+                    else:
+                        gastos_totales_x_dni[viaje[0]] += Decimal(viaje[2])
+                    viaje = next(viajes_csv,None)
+
+                #Recorre el archivo clientes para guardar los nombres de empresa en una lista y sus gastos en un diccionario
+                cliente = next(clientes_csv,None)
+                while cliente:
+                    #Si el nombre de la empresa todavia no esta en la lista lo agrega
+                    if not cliente[5] in nombres_empresa:
+                        nombres_empresa.append(cliente[5])
+                    #Si el num de dni actual existe como clave en el diccionario de gastos x dni, le suma los gastos a la empresa
+                    if cliente[2] in gastos_totales_x_dni:
+                        #Si el nombre de empresa no esta en el dicc de gastos x empresa lo agrega, sino le suma el gasto
+                        if not cliente[5] in gastos_totales_x_empresa:
+                            gastos_totales_x_empresa[cliente[5]] = gastos_totales_x_dni[cliente[2]]
+                        else:
+                            gastos_totales_x_empresa[cliente[5]] += gastos_totales_x_dni[cliente[2]]
+                    cliente = next(clientes_csv,None)
+
+                #Pide al usuario ingresar el nombre de la empresa,continua iterando hasta que solo haya un resultado o se cancele
+                empresa_elegida = []
+                while not len(empresa_elegida) == 1:
+                    #usa la funcion buscar y le envia la lista de nombres
+                    empresa_elegida, salir = buscar(nombres_empresa)
+                    if salir:
+                        break
+
+                #Si no se ingresa ningun nombre se sale de la opcion
+                if salir:
+                    return
+
+                #Imprime el nombre de la empresa y sus gastos totales, si la empresa no esta en el diccionario es xq no tiene gastos, entonces imprime 0
+                dibujar_separador()
+                if not empresa_elegida[0] in gastos_totales_x_empresa:
+                    print(f'{empresa_elegida[0]}: $0')
+                else:
+                    print(f'{empresa_elegida[0]}: ${gastos_totales_x_empresa[empresa_elegida[0]]}')
+                dibujar_separador()
+
+    except IOError:
+        print("Hubo un problema con el archivo")
 
 # Permitir obtener cantidad total de viajes realizados y monto total por
 # documento, y mostrar los datos del empleado y los viajes.
