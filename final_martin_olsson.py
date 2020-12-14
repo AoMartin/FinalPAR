@@ -1,42 +1,50 @@
 import csv
 #Importo Decimal porque float en ciertas ocasiones genera mas de 2 decimales 
 from decimal import Decimal
+import os.path
 
 def programa():
+    loguear("Menu principal")
     while True:
         imprimir_menu()
         opcion = input("\n-Ingrese el número de la opción deseada: ")
         dibujar_separador()
 
         #loguear opcione elegida si es correcta al comienzo de cada funcion
-        if opcion == "5":
+        if opcion == "6":
             #loguear salida
+            loguear("Salir")
             exit()
 
         elif opcion == "1":
-            dibujar_separador()
+            loguear("Busqueda de datos de cliente por nombre")
             print("1 - Datos de cliente por nombre")
             datos_cliente_x_nombre()
+            loguear("Menu principal")
 
         elif opcion == "2":
-            dibujar_separador()
+            loguear("Busqueda de datos de usuarios por nombre de empresa")
             print("2 - Datos de usuarios por empresa")
             total_usuarios_x_empresa()
+            loguear("Menu principal")
 
         elif opcion == "3":
-            dibujar_separador()
+            loguear("Busqueda de facturación total por nombre de empresa")
             print("3 - Facturación total por empresa")
             total_dinero_x_empresa()
+            loguear("Menu principal")
 
         elif opcion == "4":
-            dibujar_separador()
+            loguear("Busqueda de datos de de usuario por dni")
             print("4 - Datos de usuario por dni")
             total_viajes_x_dni()
+            loguear("Menu principal")
 
         elif opcion == "5":
-            dibujar_separador()
+            loguear("Consulta del log")
             print("5 - Consultar log")
             consultar_log()
+            loguear("Menu principal")
 
         else:
             print("\n-Por favor elija una opcion valida!-")
@@ -345,13 +353,28 @@ def total_viajes_x_dni():
 
 # Muestra el contenido del log en pantalla
 def consultar_log():
-    #TODO
-    pass
+    try:
+        #Se agrego encoding="utf8" al abrir el archivo porque sino tiraba un error
+        with open(".log", 'r',encoding="utf8", newline="") as archivo:
+            lines = archivo.readlines()
+            for line in lines:
+                dibujar_separador()
+                print(f'{line}')
+    except IOError:
+        print("Hubo un problema con el archivo .log")
 
 # Además se requiere que el sistema guarde las consultas en un archivo .log.
 def loguear(mensaje):
-    #TODO
-    pass
+    escribir_cabecera = not os.path.exists('.log')
+    try:
+        #Se agrego encoding="utf8" al abrir el archivo porque sino tiraba un error
+        with open(".log", 'a',encoding="utf8", newline="") as archivo:
+            #Si el archivo log no existe primero escribe la cabecera
+            if escribir_cabecera:
+                archivo.write("Acción\r")
+            archivo.write(mensaje +"\r")
+    except IOError:
+        print("Hubo un problema con el archivo .log")
 
 # VALIDAR CSV:
 '''
