@@ -353,6 +353,7 @@ def total_viajes_x_dni():
 
 # Muestra el contenido del log en pantalla
 def consultar_log():
+    dibujar_separador()
     try:
         #Se agrego encoding="utf8" al abrir el archivo porque sino tiraba un error
         with open(".log", 'r',encoding="utf8", newline="") as archivo:
@@ -362,6 +363,7 @@ def consultar_log():
                 print(f'{line}')
     except IOError:
         print("Hubo un problema con el archivo .log")
+    dibujar_separador()
 
 # Además se requiere que el sistema guarde las consultas en un archivo .log.
 def loguear(mensaje):
